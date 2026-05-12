@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClipDrop Settings</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+        background: #101010;
+        color: #f2f2f2;
+      }
+      main {
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      h1 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 650;
+      }
+      .version-badge {
+        font-size: 11px;
+        color: #888;
+        border: 1px solid #2d2d2d;
+        border-radius: 6px;
+        padding: 2px 8px;
+      }
+      .muted {
+        color: #b6b6b6;
+        font-size: 12px;
+      }
+      .card {
+        border: 1px solid #2d2d2d;
+        border-radius: 12px;
+        background: #171717;
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      input {
+        width: 100%;
+        border: 1px solid #2f2f2f;
+        border-radius: 10px;
+        padding: 10px;
+        background: #121212;
+        color: #f2f2f2;
+        font-size: 13px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      button {
+        border: 1px solid #2f2f2f;
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: #f2f2f2;
+        color: #111;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: opacity 0.15s ease;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      button.secondary {
+        background: #1b1b1b;
+        color: #e7e7e7;
+      }
+      #message {
+        min-height: 18px;
+        font-size: 12px;
+      }
+      .status-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #888;
+      }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+      }
+      .status-dot.online {
+        background: #4ade80;
+      }
+      .status-dot.offline {
+        background: #f87171;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="header">
+        <h1>ClipDrop Settings</h1>
+        <span id="version-badge" class="version-badge">v0.1.0</span>
+      </div>
+      <div class="status-row">
+        <span id="status-dot" class="status-dot"></span>
+        <span id="status-text">Checking API…</span>
+      </div>
+      <div class="muted">Default download folder is your system Downloads folder.</div>
+
+      <div class="card">
+        <label class="muted" for="download-path">Download Path</label>
+        <div class="row">
+          <input id="download-path" type="text" placeholder="Enter folder path" />
+          <button id="browse-btn" class="secondary">Browse…</button>
+        </div>
+        <div class="row">
+          <button id="save-btn">Save</button>
+          <button id="reset-btn" class="secondary">Reset To Default</button>
+        </div>
+        <div id="message" class="muted"></div>
+      </div>
+    </main>
+
+    <script>
+      const invoke =
+        window.__TAURI__?.core?.invoke ||
+        window.__TAURI_INTERNALS__?.invoke ||
+        null;
+      const pathInput = document.getElementById("download-path");
+      const browseBtn = document.getElementById("browse-btn");
+      const saveBtn = document.getElementById("save-btn");
+      const resetBtn = document.getElementById("reset-btn");
+      const message = document.getElementById("message");
+      const statusDot = document.getElementById("status-dot");
+      const statusText = document.getElementById("status-text");
+      const versionBadge = document.getElementById("version-badge");
+
+      function setMessage(text, isError = false) {
+        message.textContent = text;
+        message.style.color = isError ? "#ff9a9a" : "#b6b6b6";
+      }
+
+      async function checkApiStatus() {
+        try {
+          const res = await fetch("http://127.0.0.1:49152/health");
+          if (res.ok) {
+            const data = await res.json();
+            statusDot.className = "status-dot online";
+            statusText.textContent = "API online";
+            if (data.version) versionBadge.textContent = `v${data.version}`;
+          } else {
+            statusDot.className = "status-dot offline";
+            statusText.textContent = "API error";
+          }
+        } catch {
+          statusDot.className = "status-dot offline";
+          statusText.textContent = "API offline";
+        }
+      }
+
+      async function loadSettings() {
+        if (!invoke) {
+          setMessage("Tauri bridge not available in this window.", true);
+          return;
+        }
+        try {
+          const data = await invoke("get_download_settings");
+          pathInput.value = data.current_download_dir || data.default_download_dir || "";
+          setMessage(`Default: ${data.default_download_dir}`);
+        } catch (error) {
+          setMessage(String(error || "Failed to load settings"), true);
+        }
+      }
+
+      saveBtn.addEventListener("click", async () => {
+        const path = pathInput.value.trim();
+        if (!path) {
+          setMessage("Download path cannot be empty.", true);
+          return;
+        }
+        try {
+          if (!invoke) throw new Error("Tauri bridge not available");
+          const data = await invoke("set_download_directory", { path });
+          pathInput.value = data.current_download_dir;
+          setMessage("Download path updated.");
+        } catch (error) {
+          setMessage(String(error || "Failed to save path"), true);
+        }
+      });
+
+      browseBtn.addEventListener("click", async () => {
+        try {
+          if (!invoke) throw new Error("Tauri bridge not available");
+          const selected = await invoke("browse_download_directory", {
+            currentPath: pathInput.value.trim() || null,
+          });
+          if (selected) {
+            pathInput.value = selected;
+            setMessage("Folder selected.");
+          }
+        } catch (error) {
+          setMessage(String(error || "Failed to browse folder"), true);
+        }
+      });
+
+      resetBtn.addEventListener("click", async () => {
+        try {
+          if (!invoke) throw new Error("Tauri bridge not available");
+          const data = await invoke("reset_download_directory");
+          pathInput.value = data.current_download_dir;
+          setMessage(`Using default: ${data.default_download_dir}`);
+        } catch (error) {
+          setMessage(String(error || "Failed to reset path"), true);
+        }
+      });
+
+      loadSettings();
+      checkApiStatus();
+      setInterval(checkApiStatus, 10000);
+    </script>
+  </body>
+</html>

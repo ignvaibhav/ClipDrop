@@ -1,0 +1,202 @@
+/**
+ * ClipDrop content.css — Styles for the injected YouTube panel and button.
+ * Loaded via manifest.json content_scripts CSS array.
+ * All selectors use the `clipdrop-` prefix to avoid conflicts with YouTube's CSS.
+ */
+
+/* ── Injected button ───────────────────────────────────────────────── */
+
+#clipdrop-injected-button {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.15s ease;
+}
+
+#clipdrop-injected-button:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ── Floating panel ────────────────────────────────────────────────── */
+
+#clipdrop-inline-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 16px;
+  border: 1px solid #2d2d2d;
+  border-radius: 14px;
+  background: #121212;
+  color: #f1f1f1;
+  width: min(380px, 100%);
+  max-width: 380px;
+  font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  z-index: 2147483647;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+}
+
+/* ── Panel header ──────────────────────────────────────────────────── */
+
+.clipdrop-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.clipdrop-panel-title {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.clipdrop-close-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #2f2f2f;
+  background: #1a1a1a;
+  color: #d8d8d8;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s ease;
+}
+
+.clipdrop-close-btn:hover {
+  background: #2a2a2a;
+}
+
+/* ── Video title ───────────────────────────────────────────────────── */
+
+.clipdrop-video-title {
+  font-size: 12px;
+  color: #b7b7b7;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* ── Quality selector ──────────────────────────────────────────────── */
+
+.clipdrop-label {
+  font-size: 12px;
+  color: #d0d0d0;
+}
+
+.clipdrop-select {
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #303030;
+  background: #191919;
+  color: #f1f1f1;
+  font-size: 13px;
+}
+
+/* ── Clip section ──────────────────────────────────────────────────── */
+
+.clipdrop-clip-details {
+  margin-bottom: 12px;
+}
+
+.clipdrop-clip-summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: #d0d0d0;
+}
+
+.clipdrop-clip-slider-box {
+  display: none;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.clipdrop-clip-readout {
+  font-size: 12px;
+  color: #bcbcbc;
+  line-height: 1.4;
+}
+
+.clipdrop-clip-track {
+  position: relative;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.clipdrop-clip-track-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #2e2e2e;
+  border-radius: 999px;
+}
+
+.clipdrop-clip-fill {
+  position: absolute;
+  height: 4px;
+  background: #f1f1f1;
+  border-radius: 999px;
+  left: 0;
+  width: 100%;
+}
+
+.clipdrop-clip-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #111;
+  background: #ffffff;
+  cursor: ew-resize;
+  padding: 0;
+}
+
+/* ── Download button ───────────────────────────────────────────────── */
+
+.clipdrop-download-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #2f2f2f;
+  background: #f2f2f2;
+  color: #111111;
+  font-weight: 650;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.15s ease;
+}
+
+.clipdrop-download-btn:hover {
+  opacity: 0.9;
+}
+
+.clipdrop-download-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ── Progress area ─────────────────────────────────────────────────── */
+
+.clipdrop-progress-box {
+  display: none;
+  margin-top: 12px;
+}
+
+.clipdrop-progress-text {
+  font-size: 12px;
+  color: #d0d0d0;
+}

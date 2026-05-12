@@ -1,0 +1,46 @@
+# ----------------------------
+# Build artifacts
+# ----------------------------
+app/src-tauri/target/
+dist/
+
+# ----------------------------
+# Dependencies / tool caches
+# ----------------------------
+node_modules/
+.npm/
+
+# ----------------------------
+# Logs / temp
+# ----------------------------
+*.log
+*.tmp
+*.swp
+
+# ----------------------------
+# IDE / editor
+# ----------------------------
+.idea/
+.vscode/
+
+# ----------------------------
+# OS metadata
+# ----------------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------------
+# Local-only AI/session files
+# ----------------------------
+.codex/
+
+# ----------------------------
+# Optional local sidecar binaries
+# (keep README in resources tracked)
+# ----------------------------
+app/src-tauri/resources/yt-dlp-linux
+app/src-tauri/resources/yt-dlp-mac
+app/src-tauri/resources/yt-dlp-win.exe
+app/src-tauri/resources/ffmpeg-linux
+app/src-tauri/resources/ffmpeg-mac
+app/src-tauri/resources/ffmpeg-win.exe

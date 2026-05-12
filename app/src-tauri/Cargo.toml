@@ -1,0 +1,27 @@
+[package]
+name = "clipdrop-desktop"
+version = "0.1.0"
+edition = "2021"
+description = "Local-first YouTube downloader desktop companion"
+license = "MIT"
+repository = "https://github.com/clipdrop/clipdrop"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.7", features = ["ws", "macros"] }
+futures-util = "0.3"
+regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-autostart = "2"
+rfd = "0.14"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "process", "sync", "io-util", "fs", "time"] }
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+uuid = { version = "1", features = ["v4"] }
+which = "6"

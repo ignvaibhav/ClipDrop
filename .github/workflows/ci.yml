@@ -1,0 +1,93 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ── Extension lint ──────────────────────────────────────────────────
+  extension-lint:
+    name: Extension Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manifest JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('extension/manifest.json', 'utf8')); console.log('manifest ok')"
+
+      - name: Syntax check — content.js
+        run: node --check extension/content.js
+
+      - name: Syntax check — background.js
+        run: node --check extension/background.js
+
+      - name: Syntax check — popup.js
+        run: node --check extension/popup.js
+
+      - name: Syntax check — shared modules
+        run: |
+          node --check extension/constants.js
+          node --check extension/api.js
+          node --check extension/runtime.js
+
+      - name: Syntax check — smoke script
+        run: node --check scripts/smoke-api.mjs
+
+  # ── Rust checks ─────────────────────────────────────────────────────
+  rust-check:
+    name: Rust Check & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libgtk-3-dev \
+            libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo registry & target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            app/src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('app/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Create placeholder sidecar binaries
+        run: |
+          mkdir -p app/src-tauri/resources
+          for bin in yt-dlp-mac yt-dlp-win.exe yt-dlp-linux ffmpeg-mac ffmpeg-win.exe ffmpeg-linux; do
+            echo "placeholder: replace with real binary" > "app/src-tauri/resources/$bin"
+          done
+
+      - name: cargo check
+        working-directory: app/src-tauri
+        run: cargo check --all-targets
+
+      - name: cargo clippy
+        working-directory: app/src-tauri
+        run: cargo clippy -- -D warnings
+
+      - name: cargo fmt
+        working-directory: app/src-tauri
+        run: cargo fmt --check
