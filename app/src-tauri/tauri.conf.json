@@ -34,12 +34,8 @@
       "icons/512x512.png"
     ],
     "resources": [
-      "resources/yt-dlp-mac",
-      "resources/yt-dlp-win.exe",
-      "resources/yt-dlp-linux",
-      "resources/ffmpeg-mac",
-      "resources/ffmpeg-win.exe",
-      "resources/ffmpeg-linux"
+      "resources/yt-dlp*",
+      "resources/ffmpeg*"
     ]
   }
 }

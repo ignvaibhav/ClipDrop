@@ -55,8 +55,23 @@ Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/downloa
 
 Write-Log "Verifying backend build"
 Push-Location $AppDir
+# Check if link.exe is accessible (via Rust's discovery or PATH)
+# We run a tiny cargo check to see if the environment is actually ready.
 cargo check
+$buildStatus = $LASTEXITCODE
 Pop-Location
+
+if ($buildStatus -ne 0) {
+  Write-Host "" -ForegroundColor Yellow
+  Write-Host "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" -ForegroundColor Red
+  Write-Host "BUILD FAILED: Linker 'link.exe' not found or failed." -ForegroundColor Red
+  Write-Host "This is expected if Visual Studio Build Tools were just installed." -ForegroundColor Yellow
+  Write-Host "1. Close ALL terminal windows." -ForegroundColor White
+  Write-Host "2. (Optional but recommended) Restart your computer." -ForegroundColor White
+  Write-Host "3. Open a NEW terminal and run this script again." -ForegroundColor White
+  Write-Host "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" -ForegroundColor Red
+  exit 1
+}
 
 Write-Log "Done. Load extension from: $RootDir\extension"
 Write-Log "Run desktop app: cd `"$AppDir`" ; cargo run"
