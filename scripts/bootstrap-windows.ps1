@@ -27,13 +27,30 @@ function Ensure-RustCargoPath {
   }
 }
 
+function Check-MsvcLinker {
+  Write-Log "Checking for MSVC compiler (cl.exe)..."
+  # Try to find cl.exe using vswhere
+  $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+  if ($vsPath) {
+    Write-Log "Found Visual Studio at: $vsPath"
+    return $true
+  }
+  return $false
+}
+
 Ensure-Command "winget"
 
-Install-WingetPackage "Microsoft.VisualStudio.2022.BuildTools" @(
-  "--silent",
-  "--override",
-  "--wait --passive --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-)
+$msvcInstalled = Check-MsvcLinker
+if (-not $msvcInstalled) {
+  Write-Log "MSVC not detected. Attempting to install..."
+  Install-WingetPackage "Microsoft.VisualStudio.2022.BuildTools" @(
+    "--silent",
+    "--override",
+    "--wait --passive --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+  )
+} else {
+  Write-Log "MSVC already installed. Skipping Build Tools install."
+}
 Install-WingetPackage "Microsoft.EdgeWebView2Runtime" @("--silent")
 Install-WingetPackage "Rustlang.Rustup" @("--silent")
 Install-WingetPackage "OpenJS.NodeJS.LTS" @("--silent")

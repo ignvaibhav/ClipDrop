@@ -34,8 +34,7 @@
       "icons/512x512.png"
     ],
     "resources": [
-      "resources/yt-dlp*",
-      "resources/ffmpeg*"
+      "resources/*"
     ]
   }
 }
