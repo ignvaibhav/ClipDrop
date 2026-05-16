@@ -595,31 +595,51 @@ fn executable_alias(name: &str) -> String {
 fn link_or_copy_sidecar(source: &Path, destination: &Path) -> Result<()> {
     use std::os::unix::fs as unix_fs;
 
-    if destination.exists() {
+    if fs::symlink_metadata(destination).is_ok() {
         fs::remove_file(destination).with_context(|| {
             format!("failed to replace sidecar alias {}", destination.display())
         })?;
     }
 
-    unix_fs::symlink(source, destination)
-        .or_else(|_| {
-            fs::copy(source, destination)
-                .map(|_| ())
-                .with_context(|| {
-                    format!(
-                        "failed to copy sidecar {} to {}",
-                        source.display(),
-                        destination.display()
-                    )
-                })
-        })
-        .with_context(|| {
-            format!(
-                "failed to prepare sidecar alias {} -> {}",
-                destination.display(),
-                source.display()
-            )
-        })
+    if cfg!(target_os = "macos") {
+        fs::copy(source, destination)
+            .map(|_| ())
+            .and_then(|_| {
+                let permissions = fs::metadata(source)?.permissions();
+                fs::set_permissions(destination, permissions)
+            })
+            .with_context(|| {
+                format!(
+                    "failed to prepare sidecar alias {} -> {}",
+                    destination.display(),
+                    source.display()
+                )
+            })
+    } else {
+        unix_fs::symlink(source, destination)
+            .or_else(|_| {
+                fs::copy(source, destination)
+                    .map(|_| ())
+                    .and_then(|_| {
+                        let permissions = fs::metadata(source)?.permissions();
+                        fs::set_permissions(destination, permissions)
+                    })
+                    .with_context(|| {
+                        format!(
+                            "failed to copy sidecar {} to {}",
+                            source.display(),
+                            destination.display()
+                        )
+                    })
+            })
+            .with_context(|| {
+                format!(
+                    "failed to prepare sidecar alias {} -> {}",
+                    destination.display(),
+                    source.display()
+                )
+            })
+    }
 }
 
 #[cfg(windows)]
