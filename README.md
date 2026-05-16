@@ -1,7 +1,8 @@
 # Ferry + Island
 
 <p align="center">
-  <img src="./ferry.png" alt="Ferry and Island" width="160" />
+  <img src="extension/icons/icon128.png" alt="Ferry" width="80" />
+  <img src="app/src-tauri/icons/icon.png" alt="Island" width="80" />
 </p>
 
 <p align="center">
