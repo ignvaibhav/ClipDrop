@@ -655,6 +655,15 @@ fn sidecar_candidates(name: &str) -> Vec<PathBuf> {
     let mut candidates = Vec::new();
     if let Ok(exe) = std::env::current_exe() {
         if let Some(parent) = exe.parent() {
+            if cfg!(target_os = "macos") {
+                if let Some(contents_dir) = parent.parent() {
+                    let bundle_resource_dir = contents_dir.join("Resources").join("resources");
+                    for n in &names {
+                        candidates.push(bundle_resource_dir.join(n));
+                    }
+                }
+            }
+
             let resource_dir = parent.join("resources");
             for n in &names {
                 candidates.push(resource_dir.join(n));
