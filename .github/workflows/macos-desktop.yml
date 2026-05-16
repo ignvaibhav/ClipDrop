@@ -40,6 +40,21 @@ jobs:
         working-directory: app/src-tauri
         run: cargo tauri build --bundles app
 
+      - name: Ad-hoc sign macOS app bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_PATH="$(find app/src-tauri/target/release/bundle -type d -name 'Island.app' | head -n 1)"
+          if [[ -z "${APP_PATH}" ]]; then
+            echo "Island.app not found" >&2
+            exit 1
+          fi
+
+          # Seal the full bundle before packaging so Gatekeeper sees a consistent app bundle.
+          codesign --force --deep --sign - "${APP_PATH}"
+          codesign --verify --deep --strict --verbose=4 "${APP_PATH}"
+
       - name: Package macOS app bundle
         shell: bash
         run: |

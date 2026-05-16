@@ -142,6 +142,12 @@ Note:
 
 - these builds are for direct download convenience
 - they are not code-signed or notarized yet, so macOS may warn that the app is from an unidentified developer
+- releases published before the ad-hoc bundle-signing fix may show a misleading `"Island" is damaged and can't be opened` dialog because the zipped `.app` bundle was not sealed correctly before upload
+- if that happens on an older build, download the latest release artifact after the workflow reruns, or remove the quarantine flag manually:
+
+```bash
+xattr -cr /Applications/Island.app
+```
 
 ### Desktop requirements
 
