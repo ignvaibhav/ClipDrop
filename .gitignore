@@ -1,0 +1,4 @@
+.DS_Store
+.agents/
+ClipDrop-master/
+app/src-tauri/target/

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ferry Settings</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <main class="settings-shell">
+      <section class="settings-hero">
+        <div class="hero-brand">
+          <div class="hero-mark" aria-hidden="true">
+            <img src="icons/icon128.png" alt="" class="hero-mark-image" />
+          </div>
+          <div class="hero-copy">
+            <p class="eyebrow">Ferry extension</p>
+            <h1>Settings</h1>
+            <p class="hero-text">Keep the popup fast. Put the real controls here.</p>
+          </div>
+        </div>
+        <div class="hero-side">
+          <div id="settings-status" class="health-pill offline">Checking Island…</div>
+          <button id="back-to-popup" class="ghost-btn" type="button">Back to popup</button>
+        </div>
+      </section>
+
+      <section class="settings-grid">
+        <article class="settings-card">
+          <div class="card-head">
+            <div>
+              <p class="card-label">Appearance</p>
+              <h2>Theme mode</h2>
+            </div>
+          </div>
+          <p class="card-copy">Use system theme by default, or lock Ferry into a specific look.</p>
+          <div class="segmented" role="radiogroup" aria-label="Theme mode">
+            <button class="segment-btn" data-theme-mode="system" type="button">System</button>
+            <button class="segment-btn" data-theme-mode="dark" type="button">Dark</button>
+            <button class="segment-btn" data-theme-mode="light" type="button">Light</button>
+          </div>
+        </article>
+
+        <article class="settings-card">
+          <div class="card-head">
+            <div>
+              <p class="card-label">Desktop</p>
+              <h2>Island actions</h2>
+            </div>
+          </div>
+          <p class="card-copy">Jump straight into the local app when you need deeper controls.</p>
+          <div class="action-stack">
+            <button id="open-desktop-settings" class="action-btn" type="button">Open Island settings</button>
+            <button id="open-desktop-downloads" class="action-btn" type="button">Open downloads folder</button>
+          </div>
+        </article>
+
+        <article class="settings-card settings-card-wide">
+          <div class="card-head">
+            <div>
+              <p class="card-label">Activity</p>
+              <h2>Extension history</h2>
+            </div>
+            <div id="activity-count" class="badge-chip">0 items</div>
+          </div>
+          <p class="card-copy">The popup shows a short local history of recent transfers. You can clear it any time.</p>
+          <div class="action-row">
+            <button id="clear-extension-activity" class="action-btn danger-btn" type="button">Clear recent activity</button>
+          </div>
+        </article>
+
+        <article class="settings-card settings-card-wide">
+          <div class="card-head">
+            <div>
+              <p class="card-label">About</p>
+              <h2>Extension state</h2>
+            </div>
+          </div>
+          <div class="info-list">
+            <div class="info-row">
+              <span class="info-key">Version</span>
+              <span id="extension-version" class="info-value">0.0.0</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">Popup theme</span>
+              <span id="current-theme-mode" class="info-value">System</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">Desktop link</span>
+              <span id="desktop-link-state" class="info-value">Checking…</span>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="settings.js" type="module"></script>
+  </body>
+</html>

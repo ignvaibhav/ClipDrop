@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Island",
+  "version": "0.1.0",
+  "identifier": "com.island.desktop",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "frontendDist": "../src"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Island",
+        "width": 900,
+        "height": 640,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "trayIcon": {
+      "iconPath": "icons/icon.png"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/256x256.png",
+      "icons/512x512.png"
+    ],
+    "resources": [
+      "resources/yt-dlp-mac",
+      "resources/yt-dlp-win.exe",
+      "resources/yt-dlp-linux",
+      "resources/ffmpeg-mac",
+      "resources/ffprobe-mac",
+      "resources/ffmpeg-win.exe",
+      "resources/ffprobe-win.exe",
+      "resources/ffmpeg-linux",
+      "resources/ffprobe-linux"
+    ]
+  }
+}
