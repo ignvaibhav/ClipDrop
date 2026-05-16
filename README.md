@@ -127,6 +127,22 @@ Ferry + Island is a local-first download workflow for YouTube:
 
 ## Setup
 
+## GitHub Downloads
+
+For macOS downloads directly from GitHub:
+
+- every push to `main` runs the macOS desktop workflow and uploads downloadable workflow artifacts
+- every pushed tag matching `v*` publishes macOS release assets to GitHub Releases
+
+Current macOS outputs:
+
+- `Island.app` packaged as `Island-macOS-app.zip`
+
+Note:
+
+- these builds are for direct download convenience
+- they are not code-signed or notarized yet, so macOS may warn that the app is from an unidentified developer
+
 ### Desktop requirements
 
 <p>
