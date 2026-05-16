@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-black" />
+  <img alt="Version" src="https://img.shields.io/badge/version-v1-black" />
   <img alt="Status" src="https://img.shields.io/badge/status-alpha-111111" />
   <img alt="Local First" src="https://img.shields.io/badge/local--first-no%20cloud-111111" />
   <img alt="Chromium Extension" src="https://img.shields.io/badge/extension-Chromium%20MV3-111111?logo=googlechrome&logoColor=white" />
