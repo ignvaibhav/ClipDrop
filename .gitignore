@@ -2,3 +2,6 @@
 .agents/
 ClipDrop-master/
 app/src-tauri/target/
+codex.md
+current.md
+claude.md
