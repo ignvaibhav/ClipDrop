@@ -31,7 +31,7 @@ echo "[2/3] Build Tauri desktop bundle"
 )
 
 echo "[3/3] Package extension"
-EXT_ZIP="$DIST_DIR/clipdrop-extension.zip"
+EXT_ZIP="$DIST_DIR/ferry-extension.zip"
 rm -f "$EXT_ZIP"
 (
   cd "$EXT_DIR"

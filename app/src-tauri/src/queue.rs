@@ -116,12 +116,14 @@ impl QueueState {
 
     /// Cancel a running job or mark a queued one as cancelled.
     pub async fn cancel_job(&self, job_id: &str) -> bool {
-        self.request_stop(job_id, "Cancelled by user".to_string()).await
+        self.request_stop(job_id, "Cancelled by user".to_string())
+            .await
     }
 
     /// Skip a queued/running job.
     pub async fn skip_job(&self, job_id: &str) -> bool {
-        self.request_stop(job_id, "Skipped by user".to_string()).await
+        self.request_stop(job_id, "Skipped by user".to_string())
+            .await
     }
 
     async fn request_stop(&self, job_id: &str, message: String) -> bool {

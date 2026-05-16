@@ -84,6 +84,7 @@ node scripts/smoke-api.mjs --queue
 - Regex patterns are pre-compiled as `LazyLock` statics.
 - Runtime config via `AppConfig` (thread-safe), not environment variables.
 - Structured logging via `tracing` macros (`info!`, `warn!`, `error!`).
+- Bundled sidecars are required at runtime; no PATH fallback is part of the product flow.
 
 ### Extension
 

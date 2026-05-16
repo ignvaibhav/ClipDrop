@@ -1,163 +1,134 @@
 # Ferry + Island
 
 <p align="center">
-  <img src="./ferry.png" alt="Ferry and Island" width="180" />
+  <img src="./ferry.png" alt="Ferry and Island" width="160" />
 </p>
 
 <p align="center">
-  <strong>Ferry</strong> is the browser-side YouTube download experience.<br />
-  <strong>Island</strong> is the local desktop engine that does the actual download work.
+  <strong>Ferry</strong> is the browser UI.<br />
+  <strong>Island</strong> is the local desktop engine.
 </p>
 
 <p align="center">
   <img alt="Version" src="https://img.shields.io/badge/version-v1-black" />
   <img alt="Status" src="https://img.shields.io/badge/status-alpha-111111" />
-  <img alt="Local First" src="https://img.shields.io/badge/local--first-no%20cloud-111111" />
-  <img alt="Chromium Extension" src="https://img.shields.io/badge/extension-Chromium%20MV3-111111?logo=googlechrome&logoColor=white" />
-  <img alt="Tauri" src="https://img.shields.io/badge/desktop-Tauri%202-111111?logo=tauri&logoColor=white" />
-  <img alt="Rust" src="https://img.shields.io/badge/backend-Rust-111111?logo=rust&logoColor=white" />
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-111111" />
+  <img alt="Privacy" src="https://img.shields.io/badge/privacy-local--first-111111" />
+  <img alt="Browser" src="https://img.shields.io/badge/browser-Chromium%20MV3-111111?logo=googlechrome&logoColor=white" />
+  <img alt="Desktop" src="https://img.shields.io/badge/desktop-Tauri%202-111111?logo=tauri&logoColor=white" />
+  <img alt="Backend" src="https://img.shields.io/badge/backend-Rust-111111?logo=rust&logoColor=white" />
 </p>
 
-Ferry + Island is a local-first download workflow for YouTube:
+Ferry + Island is a local-first YouTube download workflow:
 
-- **Ferry** injects a download UI into YouTube pages and gives you a compact extension popup/settings experience.
-- **Island** runs locally on your machine, exposes a localhost API, and uses bundled media tools to download, merge, remux, and track progress.
-- **No cloud backend, no account system, no telemetry.**
+- Ferry injects a download UI directly into YouTube.
+- Island runs on your machine and does the real download work.
+- Downloads stay local.
+- There is no cloud backend, no login, and no telemetry path in the product.
 
-## Current Status
+## Product Map
+
+| Part | Role | What you see |
+|---|---|---|
+| Ferry | Browser extension | YouTube button, inline panel, popup, settings |
+| Island | Desktop app | Tray app, local API, downloads engine |
+| Bundled sidecars | Media tools | `yt-dlp`, `ffmpeg`, `ffprobe` used by Island |
+
+## What Works
 
 | Area | Status | Notes |
 |---|---|---|
-| Desktop companion | Working | Tauri tray app with local API and settings window |
-| YouTube inline UI | Working | Ferry injects directly into YouTube watch pages |
-| Popup + settings page | Working | Popup shows activity, settings open in a dedicated extension page |
-| Video downloads | Working | Current surfaced presets are `360p`, `720p`, `1080p`, `1440p`, `2160p` if available |
-| Audio downloads | Working | Current surfaced presets are top `3` audio qualities |
-| Thumbnail downloads | Working | Current surfaced presets are top `2` thumbnail sizes |
-| Clip / time range | Working | Time range selection is handled from the page player |
-| Live progress | Working | Island streams progress over WebSocket to Ferry |
-| Sidecar tools | Working | Bundled `yt-dlp`, `ffmpeg`, and `ffprobe` are used by Island |
-| Browser support today | Best on Chromium | Current extension is Manifest V3 and loads cleanly in Chromium-based browsers |
-| Firefox / Safari | Not first-class yet | Not packaged or documented here as a supported release path yet |
+| Inline YouTube panel | Working | Main GUI flow |
+| Popup activity view | Working | Recent jobs, progress, reveal, cancel |
+| Desktop settings window | Working | Download folder and local app controls |
+| Video downloads | Working | Current presets: `360p`, `720p`, `1080p`, `1440p`, `2160p` |
+| Audio downloads | Working | Top `3` audio qualities only |
+| Thumbnail downloads | Working | Top `2` thumbnail sizes only |
+| Clip range | Working | Controlled from the YouTube page player |
+| Live progress | Working | WebSocket from Island to Ferry |
+| GitHub desktop builds | Working | macOS, Windows, Linux release matrix |
 
-## What This Repo Gives You
-
-- Download button injected into the YouTube action area
-- Inline panel for **video**, **audio**, and **thumbnail** downloads
-- Clip-range selection for video and audio
-- Local queue-based downloader
-- Live progress, completion, and error feedback
-- Activity history in the popup
-- Dedicated extension settings page
-- Tray-based desktop companion with local-only API
-
-## Architecture
+## How It Feels
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                        BROWSER                              │
-│                                                             │
-│   YouTube Watch Page                                        │
-│   ┌─────────────────────────────────────────────────────┐  │
-│   │  [Like] [Share] [Ferry]  ← injected UI             │  │
-│   └─────────────────────────────────────────────────────┘  │
-│                          │                                  │
-│                Ferry inline panel / popup                   │
-│                          │                                  │
-│           localhost HTTP + WebSocket messages               │
-└──────────────────────────┼──────────────────────────────────┘
-                           │
-                    127.0.0.1:49152
-                           │
-┌──────────────────────────▼──────────────────────────────────┐
-│                    ISLAND DESKTOP APP                        │
-│                                                             │
-│   Axum API  →  Queue  →  yt-dlp / ffmpeg / ffprobe         │
-│                                                             │
-│                 Downloaded file saved locally               │
-└─────────────────────────────────────────────────────────────┘
+YouTube page
+   ↓
+Ferry button + inline panel
+   ↓
+Choose video / audio / thumbnail
+   ↓
+Island local API on 127.0.0.1:49152
+   ↓
+Bundled yt-dlp + ffmpeg + ffprobe
+   ↓
+File saved locally
 ```
 
-## Repository Layout
+## GUI Flow
 
-```text
-.
-├── extension/                 # Ferry browser extension
-│   ├── manifest.json
-│   ├── content.js             # injected YouTube UI
-│   ├── content.css
-│   ├── background.js          # service worker, WS, activity, notifications
-│   ├── popup.html/css/js      # toolbar popup
-│   ├── settings.html/css/js   # extension settings page
-│   ├── api.js
-│   ├── constants.js
-│   └── runtime.js
-├── app/
-│   ├── src/                   # Tauri webview pages
-│   └── src-tauri/
-│       ├── resources/         # sidecar binaries
-│       ├── src/
-│       │   ├── main.rs
-│       │   ├── server.rs
-│       │   ├── queue.rs
-│       │   ├── downloader.rs
-│       │   ├── formats.rs
-│       │   ├── models.rs
-│       │   ├── config.rs
-│       │   └── error.rs
-│       └── tauri.conf.json
-├── docs/
-├── scripts/
-└── README.md
-```
+### 1. Open a YouTube video
+- Ferry injects its button into the watch page.
 
-## Download Flow
+### 2. Open the Ferry panel
+- Choose:
+  - video
+  - audio
+  - thumbnail
 
-1. Open a YouTube watch page.
-2. Ferry injects its inline UI and starts preparing format data.
-3. You choose a mode:
-   - video
-   - audio
-   - thumbnail
-4. Ferry sends the download request to Island over `http://127.0.0.1:49152`.
-5. Island queues the job and runs the bundled downloader sidecars.
-6. Progress is streamed back to Ferry over WebSocket.
-7. The file is saved locally and can be revealed from the popup/activity UI.
+### 3. Pick a quality
+- Ferry shows a reduced, cleaner preset list instead of a huge raw format dump.
 
-## Setup
+### 4. Download
+- Island receives the job.
+- Ferry shows progress live in the page and popup.
 
-## GitHub Downloads
+## Download Options
 
-For macOS downloads directly from GitHub:
+### Video
+- `360p`
+- `720p`
+- `1080p`
+- `1440p`
+- `2160p`
 
-- every push to `main` runs the macOS desktop workflow and uploads downloadable workflow artifacts
-- every pushed tag matching `v*` publishes macOS release assets to GitHub Releases
+### Audio
+- top `3` audio qualities only
 
-Current macOS outputs:
-
-- `Island.app` packaged as `Island-macOS-app.zip`
+### Thumbnail
+- top `2` thumbnail sizes only
 
 Note:
+- thumbnail URLs stay internal to Island
+- the extension does not receive raw thumbnail source links
 
-- these builds are for direct download convenience
-- they are not code-signed or notarized yet, so macOS may warn that the app is from an unidentified developer
-- releases published before the ad-hoc bundle-signing fix may show a misleading `"Island" is damaged and can't be opened` dialog because the zipped `.app` bundle was not sealed correctly before upload
-- if that happens on an older build, download the latest release artifact after the workflow reruns, or remove the quarantine flag manually:
+## Direct Downloads
+
+<p>
+  <img alt="macOS" src="https://img.shields.io/badge/macOS-Island--macOS--app.zip-111111?logo=apple&logoColor=white" />
+  <img alt="Windows" src="https://img.shields.io/badge/Windows-Island--windows--setup.exe-111111?logo=windows&logoColor=white" />
+  <img alt="Linux" src="https://img.shields.io/badge/Linux-AppImage%20%2B%20deb-111111?logo=linux&logoColor=white" />
+</p>
+
+GitHub Releases publish:
+
+- `Island-macOS-app.zip`
+- `Island-windows-setup.exe`
+- `Island-linux.AppImage`
+- `Island-linux.deb`
+
+Important:
+- macOS builds are convenient direct-download builds
+- they are not notarized yet
+- Gatekeeper may still warn on first open
+
+If an older macOS build is quarantined:
 
 ```bash
 xattr -cr /Applications/Island.app
 ```
 
-### Desktop requirements
+## Quick Start
 
-<p>
-  <img alt="macOS" src="https://img.shields.io/badge/macOS-supported-111111?logo=apple&logoColor=white" />
-  <img alt="Windows" src="https://img.shields.io/badge/Windows-supported-111111?logo=windows&logoColor=white" />
-  <img alt="Linux" src="https://img.shields.io/badge/Linux-supported-111111?logo=linux&logoColor=white" />
-</p>
-
-### Browser requirements
+### Browser
 
 <p>
   <img alt="Chrome" src="https://img.shields.io/badge/Chrome-load%20unpacked-111111?logo=googlechrome&logoColor=white" />
@@ -165,7 +136,15 @@ xattr -cr /Applications/Island.app
   <img alt="Brave" src="https://img.shields.io/badge/Brave-load%20unpacked-111111?logo=brave&logoColor=white" />
 </p>
 
-### Option A: bootstrap in one command
+### Option A: Use release builds
+
+1. Download the Island desktop app from GitHub Releases.
+2. Install or unzip it.
+3. Launch Island.
+4. Load the `extension/` folder as an unpacked extension.
+5. Open a YouTube watch page.
+
+### Option B: Run locally from source
 
 #### macOS
 
@@ -185,119 +164,98 @@ xattr -cr /Applications/Island.app
 powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap-windows.ps1
 ```
 
-These scripts install the Rust toolchain, Node.js, media dependencies, and verify the backend build.
+These scripts:
 
-### Option B: run manually
+- install platform prerequisites
+- install Rust
+- install Tauri CLI
+- hydrate bundled sidecars where needed
+- run `cargo check`
 
-#### 1. Start Island
+## Run From Source
+
+### Start Island
 
 ```bash
 cd app/src-tauri
 cargo run
 ```
 
-Expected startup log:
+Expected log:
 
 ```text
 INFO island_desktop::server: Island API listening on http://127.0.0.1:49152
 ```
 
-#### 2. Load Ferry
+### Load Ferry
 
 1. Open `chrome://extensions`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select the [`extension/`](./extension) folder
-5. Open a YouTube watch page
+2. Enable `Developer mode`
+3. Click `Load unpacked`
+4. Select [`extension/`](./extension)
+5. Refresh any YouTube tabs
 
-## Using Ferry
+## Repository Layout
 
-### Inline panel
+```text
+.
+├── extension/            Ferry browser extension
+├── app/src-tauri/        Island desktop backend + Tauri config
+├── app/src/              Island webview pages
+├── scripts/              bootstrap, build, and smoke helpers
+├── docs/                 supporting technical docs
+└── README.md
+```
 
-The primary experience is the injected Ferry panel on YouTube watch pages.
+## Main Files
 
-You can:
+### Extension
+- [manifest.json](./extension/manifest.json)
+- [content.js](./extension/content.js)
+- [content.css](./extension/content.css)
+- [background.js](./extension/background.js)
+- [popup.js](./extension/popup.js)
+- [settings.js](./extension/settings.js)
 
-- choose video quality
-- choose MP3 bitrate
-- choose thumbnail size
-- set a clip range for video/audio
-- trigger a download without leaving the page
-
-### Popup
-
-The toolbar popup is a companion surface for:
-
-- recent transfers
-- job progress
-- reveal / cancel / skip actions
-- opening the extension settings page
-
-### Extension settings page
-
-The Ferry settings page currently includes:
-
-- theme mode controls
-- Island connection status
-- quick actions like opening downloads or Island settings
-
-## Current Format Surface
-
-Ferry currently limits the surfaced quality list intentionally:
-
-### Video
-
-- `360p`
-- `720p`
-- `1080p`
-- `1440p`
-- `2160p`
-
-Only the heights actually available for a given video are returned.
-
-### Audio
-
-- top `3` highest qualities only
-
-### Thumbnail
-
-- top `2` highest sizes only
-
-Thumbnail URLs are kept internal to Island and are not exposed as raw links in the extension-facing format payload.
+### Desktop app
+- [main.rs](./app/src-tauri/src/main.rs)
+- [server.rs](./app/src-tauri/src/server.rs)
+- [queue.rs](./app/src-tauri/src/queue.rs)
+- [downloader.rs](./app/src-tauri/src/downloader.rs)
+- [formats.rs](./app/src-tauri/src/formats.rs)
+- [tauri.conf.json](./app/src-tauri/tauri.conf.json)
 
 ## Local API
 
 | Endpoint | Method | Purpose |
 |---|---|---|
 | `/health` | GET | Check whether Island is reachable |
-| `/formats` | POST | Fetch the current limited format set for a YouTube URL |
-| `/download` | POST | Queue a new download |
-| `/status/{job_id}` | GET | Poll job status |
-| `/reveal` | POST | Reveal a saved file/folder |
-| `/jobs/{job_id}/cancel` | POST | Cancel a queued or active job |
+| `/formats` | POST | Fetch reduced format presets |
+| `/download` | POST | Queue a download |
+| `/status/{job_id}` | GET | Poll job state |
+| `/reveal` | POST | Reveal a file or folder |
+| `/jobs/{job_id}/cancel` | POST | Cancel a job |
 | `/jobs/{job_id}/skip` | POST | Skip a queued job |
 | `/action/open-settings` | POST | Open Island settings |
-| `/action/open-downloads` | POST | Open the downloads folder |
-| `/ws` | GET / ANY | WebSocket progress stream |
+| `/action/open-downloads` | POST | Open downloads folder |
+| `/ws` | GET | Progress WebSocket |
 
 ## Development
 
-### Validation
-
-Run the dev checks:
+### Checks
 
 ```bash
 ./scripts/dev-check.sh
 ```
 
-This covers:
+This runs:
 
 - `cargo check`
 - `cargo clippy -- -D warnings`
 - `cargo fmt --check`
-- `node --check` on extension scripts
+- `node --check` on extension files
 
-### API smoke test
+### Smoke test
 
 With Island running:
 
@@ -305,48 +263,38 @@ With Island running:
 node scripts/smoke-api.mjs
 ```
 
-Or queue a test download:
+Queue a test job:
 
 ```bash
 node scripts/smoke-api.mjs --queue
 ```
 
-### Full build helper
+### Local build helper
 
 ```bash
 ./scripts/build-all.sh
 ```
 
+## Platform Notes
+
+- Chromium is the main browser path right now.
+- Firefox and Safari are not first-class release targets in this repo yet.
+- Linux now ships through CI, but distro differences still make it the least uniform desktop target.
+- macOS still needs proper signing/notarization for the smoothest public install flow.
+
+See the platform audit:
+
+- [platform-audit.md](./docs/platform-audit.md)
+
 ## Troubleshooting
 
-| Problem | What to check |
+| Problem | Check |
 |---|---|
-| Ferry button is missing on YouTube | Reload the extension, then refresh the YouTube tab |
-| Popup says Island is offline | Make sure `cargo run` is active in [`app/src-tauri`](./app/src-tauri) |
-| Downloads do not start | Check Island logs in the terminal first |
-| Extension changed but YouTube still shows old UI | Reload the extension and refresh all YouTube tabs |
-| Port `49152` is already in use | Stop the existing process using that port |
-| You get fewer qualities than expected | Ferry currently surfaces a reduced list by design |
-
-## Current Constraints
-
-This repo is in an active product-building phase, so a few things are intentionally still in-progress:
-
-- format probing is still yt-dlp based and can be slow on some videos
-- Firefox and Safari are not documented as first-class release targets here yet
-- YouTube is the only supported platform in the current code path
-- no backend format cache is documented as part of the public setup flow yet
-
-## Why Ferry + Island Exists
-
-This project is not trying to be a cloud service or a download website clone.
-
-It is trying to make this feel native:
-
-- browser-first
-- local-first
-- private by default
-- no terminal for normal usage
+| Ferry button missing | Reload the extension and refresh YouTube |
+| Popup says Island is offline | Make sure Island is running on `127.0.0.1:49152` |
+| Download stuck | Check Island terminal logs first |
+| Old UI still showing | Reload the extension and refresh all YouTube tabs |
+| Fewer qualities than expected | Ferry intentionally shows a reduced preset list |
 
 ## License
 

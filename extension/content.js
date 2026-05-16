@@ -695,11 +695,6 @@ function renderFormats(panel, formats, loading = false) {
 
   if (loading) return;
 
-  console.debug("[Ferry] renderFormats", {
-    count: Array.isArray(formats) ? formats.length : 0,
-    formats,
-  });
-
   for (const format of formats) {
     if (!format?.label) continue;
     const mediaType =
@@ -1041,12 +1036,6 @@ function createPanel() {
 
     const clip = payload.media_type === "thumbnail" ? null : clipPayload(panel);
     if (clip) payload.clip = clip;
-
-    console.debug("[Ferry] sending download", {
-      shown: preset.quality,
-      sent_height: payload.height,
-      sent_format_id: payload.format_id,
-    });
 
     setStatus(panel, "Queue…", true, true);
 

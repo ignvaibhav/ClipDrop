@@ -173,7 +173,9 @@ async fn cancel_job(
     if state.queue.cancel_job(&job_id).await {
         Ok(Json(serde_json::json!({ "ok": true })))
     } else {
-        Err(AppError::NotFound("job not found or not cancellable".to_string()))
+        Err(AppError::NotFound(
+            "job not found or not cancellable".to_string(),
+        ))
     }
 }
 
@@ -184,7 +186,9 @@ async fn skip_job(
     if state.queue.skip_job(&job_id).await {
         Ok(Json(serde_json::json!({ "ok": true })))
     } else {
-        Err(AppError::NotFound("job not found or not skippable".to_string()))
+        Err(AppError::NotFound(
+            "job not found or not skippable".to_string(),
+        ))
     }
 }
 
@@ -204,10 +208,8 @@ async fn reveal(Json(payload): Json<RevealRequest>) -> Result<Json<serde_json::V
 
     let result = if cfg!(target_os = "windows") {
         // /select,path highlights the file in explorer
-        StdCommand::new("explorer")
-            .arg("/select,")
-            .arg(&target)
-            .status()
+        let selector = format!("/select,{}", target.display());
+        StdCommand::new("explorer").arg(selector).status()
     } else if cfg!(target_os = "macos") {
         // -R reveals and selects the file in Finder
         StdCommand::new("open").arg("-R").arg(&target).status()
@@ -232,7 +234,9 @@ async fn reveal(Json(payload): Json<RevealRequest>) -> Result<Json<serde_json::V
     }
 }
 
-async fn open_settings_handler(State(state): State<ApiState>) -> Result<Json<serde_json::Value>, AppError> {
+async fn open_settings_handler(
+    State(state): State<ApiState>,
+) -> Result<Json<serde_json::Value>, AppError> {
     crate::open_settings_window(&state.app_handle).map_err(|err| {
         error!(error = %err, "failed to open settings window via API");
         AppError::Internal(format!("failed to open settings: {err}"))
@@ -240,11 +244,15 @@ async fn open_settings_handler(State(state): State<ApiState>) -> Result<Json<ser
     Ok(Json(serde_json::json!({ "ok": true })))
 }
 
-async fn open_downloads_handler(State(state): State<ApiState>) -> Result<Json<serde_json::Value>, AppError> {
-    crate::open_downloads_folder(&state.config).await.map_err(|err| {
-        error!(error = %err, "failed to open downloads folder via API");
-        AppError::Internal(format!("failed to open downloads: {err}"))
-    })?;
+async fn open_downloads_handler(
+    State(state): State<ApiState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    crate::open_downloads_folder(&state.config)
+        .await
+        .map_err(|err| {
+            error!(error = %err, "failed to open downloads folder via API");
+            AppError::Internal(format!("failed to open downloads: {err}"))
+        })?;
     Ok(Json(serde_json::json!({ "ok": true })))
 }
 

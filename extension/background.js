@@ -34,9 +34,6 @@ function broadcastToExtension(message) {
   if (!runtimeAvailable()) return;
   var runtime = globalThis.chrome && globalThis.chrome.runtime;
   if (!runtime || typeof runtime.sendMessage !== "function") return;
-  
-  // LOGGING: Track outgoing events
-  console.debug("[Ferry-BG] Broadcasting internal event:", message.type, message.payload ? message.payload.job_id : "");
 
   try {
     runtime.sendMessage(message).catch(function() {
@@ -430,9 +427,6 @@ function handleSocketMessage(event) {
   if (!payload || !payload.job_id) return;
   var jobId = payload.job_id;
 
-  // LOGGING: Track incoming WS data
-  console.debug("[Ferry-BG] WS Message:", payload.event, jobId);
-
   // Broadcast to extension immediately for snappy UI
   broadcastToExtension({ type: "WS_EVENT", payload: payload });
 
@@ -500,15 +494,12 @@ function connectSocket() {
       return;
     }
 
-    console.debug("[Ferry-BG] Opening WebSocket to:", WS_URL);
     socket = new WebSocket(WS_URL);
-    socket.onopen = function() { 
-      console.debug("[Ferry-BG] WebSocket connected");
-      reconnectDelay = 2000; 
+    socket.onopen = function() {
+      reconnectDelay = 2000;
     };
     socket.onmessage = handleSocketMessage;
     socket.onclose = function() {
-      console.debug("[Ferry-BG] WebSocket closed");
       scheduleReconnect();
     };
     socket.onerror = function() {
@@ -579,7 +570,6 @@ if (globalThis.chrome && globalThis.chrome.runtime && globalThis.chrome.runtime.
           return reconcileActivityState(items);
         });
       }).then(function(items) {
-        console.debug("[Ferry-BG] Sending activity items to popup:", items.length);
         sendResponse({ ok: true, items: items });
       });
       return true;

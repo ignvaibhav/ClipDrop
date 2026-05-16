@@ -97,7 +97,12 @@ pub async fn fetch_formats(url: &str) -> Result<Vec<FormatOption>> {
         serde_json::from_slice(&output.stdout).context("invalid yt-dlp json output")?;
     let (videos_by_height, audio_candidates, thumbnail_candidates) = parse_format_data(&data);
 
-    let result = build_format_options(url, videos_by_height, &audio_candidates, &thumbnail_candidates);
+    let result = build_format_options(
+        url,
+        videos_by_height,
+        &audio_candidates,
+        &thumbnail_candidates,
+    );
     info!(url, count = result.len(), "format options built");
     for option in &result {
         info!(
@@ -151,9 +156,10 @@ fn parse_format_data(
             .unwrap_or(0.0);
         let fps = item.get("fps").and_then(Value::as_f64).unwrap_or(30.0) as u16;
 
-        let filesize = item.get("filesize").and_then(Value::as_u64).or_else(|| {
-            item.get("filesize_approx").and_then(Value::as_u64)
-        });
+        let filesize = item
+            .get("filesize")
+            .and_then(Value::as_u64)
+            .or_else(|| item.get("filesize_approx").and_then(Value::as_u64));
 
         if !has_url {
             continue;
@@ -287,7 +293,7 @@ fn build_format_options(
     }
 
     let mut audio_options = audio_candidates.to_vec();
-    audio_options.sort_by(|l, r| rank_audio_candidate(l).cmp(&rank_audio_candidate(r)));
+    audio_options.sort_by_key(rank_audio_candidate);
     audio_options.dedup_by_key(|candidate| (candidate.abr.round() as u64, candidate.ext.clone()));
     for candidate in audio_options.into_iter().rev().take(MAX_AUDIO_PRESETS) {
         let abr = candidate.abr.round() as u64;
@@ -308,14 +314,17 @@ fn build_format_options(
             format_id: Some(candidate.format_id),
             width: None,
             height: None,
-            note: Some(format!("audio source {} • {:.0} kbps", candidate.ext, candidate.abr)),
+            note: Some(format!(
+                "audio source {} • {:.0} kbps",
+                candidate.ext, candidate.abr
+            )),
             filesize: candidate.filesize,
             vcodec: None,
         });
     }
 
     let mut thumbnails = thumbnail_candidates.to_vec();
-    thumbnails.sort_by(|l, r| rank_thumbnail_candidate(l).cmp(&rank_thumbnail_candidate(r)));
+    thumbnails.sort_by_key(rank_thumbnail_candidate);
     thumbnails.dedup_by_key(|candidate| (candidate.width, candidate.height, candidate.ext.clone()));
     for candidate in thumbnails.into_iter().rev().take(MAX_THUMBNAIL_PRESETS) {
         let selector = register_thumbnail_selector(source_url, &candidate);

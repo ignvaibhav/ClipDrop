@@ -117,7 +117,6 @@ pub struct HealthResponse {
     pub download_dir_name: String,
 }
 
-
 /// Response from `GET /status/:job_id`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StatusResponse {

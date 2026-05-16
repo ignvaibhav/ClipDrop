@@ -3,7 +3,6 @@ $ErrorActionPreference = "Stop"
 
 $RootDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $AppDir = Join-Path $RootDir "app\src-tauri"
-$ResDir = Join-Path $AppDir "resources"
 
 function Write-Log($msg) {
   Write-Host "[bootstrap-windows] $msg"
@@ -42,6 +41,10 @@ Install-WingetPackage "Gyan.FFmpeg" @("--silent")
 
 Ensure-RustCargoPath
 
+if ($env:Path -notlike "*C:\ProgramData\chocolatey\bin*") {
+  $env:Path = "C:\ProgramData\chocolatey\bin;$env:Path"
+}
+
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
   throw "Cargo not found after Rust install. Open a new terminal and run this script again."
 }
@@ -49,9 +52,8 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
 Write-Log "Installing Tauri CLI"
 cargo install tauri-cli --version "^2"
 
-New-Item -ItemType Directory -Force -Path $ResDir | Out-Null
-Write-Log "Installing latest yt-dlp sidecar"
-Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -OutFile (Join-Path $ResDir "yt-dlp-win.exe")
+Write-Log "Hydrating bundled yt-dlp / ffmpeg / ffprobe sidecars"
+& (Join-Path $RootDir "scripts\hydrate-sidecars-windows.ps1")
 
 Write-Log "Verifying backend build"
 Push-Location $AppDir

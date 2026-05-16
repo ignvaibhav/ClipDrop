@@ -8,14 +8,14 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::LazyLock;
 use std::sync::Arc;
+use std::sync::LazyLock;
 use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use regex::Regex;
-use tokio::net::lookup_host;
 use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::net::lookup_host;
 use tokio::process::Command;
 use tokio::sync::mpsc;
 use tracing::{info, warn};
@@ -79,8 +79,12 @@ pub async fn run_download(
 
     preflight_connectivity_check(request, &tx).await?;
 
-    let mut cmd =
-        build_download_command(&yt_dlp, ffmpeg_location.as_deref(), request, &output_template);
+    let mut cmd = build_download_command(
+        &yt_dlp,
+        ffmpeg_location.as_deref(),
+        request,
+        &output_template,
+    );
     let result = tokio::time::timeout(
         DOWNLOAD_TIMEOUT,
         execute_download(job_id, &mut cmd, &tx, cancel_flag.clone()),
@@ -339,9 +343,7 @@ fn apply_format_flags(request: &DownloadRequest, cmd: &mut Command) {
             info!(shown = %request.quality, "using best audio selector");
             cmd.arg("-f").arg("bestaudio/best");
         }
-        cmd.arg("--extract-audio")
-            .arg("--audio-format")
-            .arg("mp3");
+        cmd.arg("--extract-audio").arg("--audio-format").arg("mp3");
         return;
     }
 
@@ -358,13 +360,16 @@ fn apply_format_flags(request: &DownloadRequest, cmd: &mut Command) {
         }
     }
 
-    let height = request.height.map(|value| value.to_string()).unwrap_or_else(|| {
-        request
-            .quality
-            .chars()
-            .filter(char::is_ascii_digit)
-            .collect::<String>()
-    });
+    let height = request
+        .height
+        .map(|value| value.to_string())
+        .unwrap_or_else(|| {
+            request
+                .quality
+                .chars()
+                .filter(char::is_ascii_digit)
+                .collect::<String>()
+        });
 
     if height.is_empty() {
         info!(shown = %request.quality, "using broad fallback selector");
@@ -378,8 +383,9 @@ fn apply_format_flags(request: &DownloadRequest, cmd: &mut Command) {
         chosen_height = %height,
         "using height ceiling selector"
     );
-    cmd.arg("-f")
-        .arg(format!("bestvideo[height<={height}]+bestaudio/best[height<={height}]/best"));
+    cmd.arg("-f").arg(format!(
+        "bestvideo[height<={height}]+bestaudio/best[height<={height}]/best"
+    ));
     apply_mp4_output_flags(cmd);
 }
 
@@ -558,7 +564,10 @@ pub fn resolve_binary(name: &str) -> Result<PathBuf> {
 
 /// Check if a sidecar file is just a placeholder.
 fn is_placeholder_sidecar(path: &Path) -> bool {
-    if fs::metadata(path).map(|meta| meta.len() == 0).unwrap_or(false) {
+    if fs::metadata(path)
+        .map(|meta| meta.len() == 0)
+        .unwrap_or(false)
+    {
         return true;
     }
 
@@ -650,15 +659,13 @@ fn link_or_copy_sidecar(source: &Path, destination: &Path) -> Result<()> {
         })?;
     }
 
-    fs::copy(source, destination)
-        .map(|_| ())
-        .with_context(|| {
-            format!(
-                "failed to copy sidecar {} to {}",
-                source.display(),
-                destination.display()
-            )
-        })
+    fs::copy(source, destination).map(|_| ()).with_context(|| {
+        format!(
+            "failed to copy sidecar {} to {}",
+            source.display(),
+            destination.display()
+        )
+    })
 }
 
 /// Generate candidate paths for a platform-specific sidecar binary.

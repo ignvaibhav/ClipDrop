@@ -3,7 +3,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="$ROOT_DIR/app/src-tauri"
-RES_DIR="$APP_DIR/resources"
 
 log() { echo "[bootstrap-linux] $*"; }
 
@@ -88,18 +87,6 @@ install_tauri_cli() {
   cargo install tauri-cli --version '^2'
 }
 
-install_latest_ytdlp_sidecar() {
-  mkdir -p "$RES_DIR"
-  local arch
-  arch="$(uname -m)"
-  local asset="yt-dlp_linux"
-  if [[ "$arch" == "aarch64" || "$arch" == "arm64" ]]; then
-    asset="yt-dlp_linux_aarch64"
-  fi
-  curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/${asset}" -o "$RES_DIR/yt-dlp-linux"
-  chmod +x "$RES_DIR/yt-dlp-linux"
-}
-
 main() {
   ensure_sudo
   log "Installing Linux dependencies"
@@ -109,8 +96,8 @@ main() {
   source_cargo
   log "Installing Tauri CLI"
   install_tauri_cli
-  log "Installing latest yt-dlp sidecar"
-  install_latest_ytdlp_sidecar
+  log "Hydrating bundled yt-dlp / ffmpeg / ffprobe sidecars"
+  "$ROOT_DIR/scripts/hydrate-sidecars-linux.sh"
   log "Verifying backend build"
   (cd "$APP_DIR" && cargo check)
   log "Done. Load extension from: $ROOT_DIR/extension"

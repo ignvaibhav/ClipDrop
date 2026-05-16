@@ -1,4 +1,4 @@
-# Island & Ferry Architecture (v0.1)
+# Island & Ferry Architecture (v1)
 
 ## Components
 
@@ -81,7 +81,7 @@ evicted when the cap is reached.
 1. **Local-only**: No remote backend, no telemetry, no accounts.
 2. **Sequential queue**: Downloads processed one at a time to avoid
    bandwidth contention and yt-dlp locking issues.
-3. **Sidecar-first resolution**: yt-dlp binary checked in resources/
-   before falling back to PATH, with placeholder detection.
+3. **Bundled sidecars only**: Island resolves `yt-dlp`, `ffmpeg`, and
+   `ffprobe` from bundled resources only, with placeholder detection.
 4. **Inline panel UX**: Primary interaction is the injected panel, not
    the toolbar popup, so users never leave the YouTube page.
