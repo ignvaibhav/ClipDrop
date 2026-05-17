@@ -1,5 +1,5 @@
-import { checkHealth, openSettings, openDownloads } from "./api.js";
-import { ACTIVITY_KEY } from "./constants.js";
+import { checkHealth, openSettings, openDownloads } from "../shared/api.js";
+import { ACTIVITY_KEY } from "../shared/constants.js";
 
 var THEME_STORAGE_KEY = "ferryPopupThemeMode";
 var systemThemeQuery = globalThis.matchMedia ? globalThis.matchMedia("(prefers-color-scheme: dark)") : null;

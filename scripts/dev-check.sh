@@ -37,12 +37,12 @@ echo "[4/5] Backend formatting check"
 )
 
 echo "[5/5] Extension + smoke script syntax"
-node --check "$ROOT_DIR/extension/content.js"
-node --check "$ROOT_DIR/extension/background.js"
-node --check "$ROOT_DIR/extension/popup.js"
-node --check "$ROOT_DIR/extension/constants.js"
-node --check "$ROOT_DIR/extension/api.js"
-node --check "$ROOT_DIR/extension/runtime.js"
+node --check "$ROOT_DIR/extension/content/content.js"
+node --check "$ROOT_DIR/extension/background/background.js"
+node --check "$ROOT_DIR/extension/popup/popup.js"
+node --check "$ROOT_DIR/extension/shared/constants.js"
+node --check "$ROOT_DIR/extension/shared/api.js"
+node --check "$ROOT_DIR/extension/shared/runtime.js"
 node --check "$ROOT_DIR/scripts/smoke-api.mjs"
 node -e "JSON.parse(require('fs').readFileSync('$ROOT_DIR/extension/manifest.json', 'utf8')); console.log('manifest ok')"
 

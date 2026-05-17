@@ -2,8 +2,8 @@
  * Ferry popup — focused transfer control surface.
  */
 
-import { checkHealth, revealPath, cancelJob, openSettings } from "./api.js";
-import { runtimeAvailable, safeSendMessage } from "./runtime.js";
+import { checkHealth, revealPath, cancelJob, openSettings } from "../shared/api.js";
+import { runtimeAvailable, safeSendMessage } from "../shared/runtime.js";
 
 var statusDot = document.getElementById("status-dot");
 var statusPill = document.getElementById("status-pill");

@@ -5,9 +5,9 @@
  * events to content/popup contexts, and creates desktop notifications.
  */
 
-import { API_BASE, WS_URL, ACTIVITY_KEY, MAX_ACTIVITY_ITEMS } from "./constants.js";
-import { loadFormats } from "./api.js";
-import { runtimeAvailable } from "./runtime.js";
+import { API_BASE, WS_URL, ACTIVITY_KEY, MAX_ACTIVITY_ITEMS } from "../shared/constants.js";
+import { loadFormats } from "../shared/api.js";
+import { runtimeAvailable } from "../shared/runtime.js";
 
 // ---------------------------------------------------------------------------
 // State

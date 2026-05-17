@@ -68,13 +68,13 @@ evicted when the cap is reached.
 
 ## Extension Architecture
 
-- **content.js** — Primary UX. Injects button + floating panel on YouTube.
+- **content/content.js** — Primary UX. Injects button + floating panel on YouTube.
   Cannot use ES modules (MV3 content script limitation).
-- **background.js** — Service worker (ES module). Manages WebSocket to
+- **background/background.js** — Service worker (ES module). Manages WebSocket to
   desktop API, creates notifications, tracks activity feed.
-- **popup.js** — Fallback UX via toolbar icon (ES module). Imports shared
-  modules (`api.js`, `runtime.js`, `constants.js`).
-- **content.css** — Styles for injected elements, loaded via manifest.
+- **popup/popup.js** — Fallback UX via toolbar icon (ES module). Imports shared
+  modules (`shared/api.js`, `shared/runtime.js`, `shared/constants.js`).
+- **content/content.css** — Styles for injected elements, loaded via manifest.
 
 ## Key Design Decisions
 
@@ -85,3 +85,4 @@ evicted when the cap is reached.
    before falling back to PATH, with placeholder detection.
 4. **Inline panel UX**: Primary interaction is the injected panel, not
    the toolbar popup, so users never leave the YouTube page.
+

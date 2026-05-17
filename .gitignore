@@ -1,7 +1,17 @@
+# ── OS artifacts ────────────────────────────────────
 .DS_Store
+
+# ── Build output ────────────────────────────────────
+app/src-tauri/target/
+dist/
+
+# ── Legacy / private directories ────────────────────
 .agents/
 ClipDrop-master/
-app/src-tauri/target/
+
+# ── AI agent context files (not for public repo) ────
 codex.md
 current.md
 claude.md
+skills-lock.json
+docs/SKILLS_IMPLEMENTATION.md
