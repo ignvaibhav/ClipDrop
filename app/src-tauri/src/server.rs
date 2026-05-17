@@ -5,8 +5,9 @@
 
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use std::process::Command as StdCommand;
 
-use axum::extract::ws::{WebSocket, WebSocketUpgrade};
+use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use axum::routing::{any, get, post};
@@ -25,7 +26,6 @@ use crate::models::{
     RevealRequest, StatusResponse, WsEvent,
 };
 use crate::queue::QueueState;
-use crate::platform;
 
 /// Application version — single source of truth.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -202,7 +202,24 @@ async fn reveal(Json(payload): Json<RevealRequest>) -> Result<Json<serde_json::V
         )));
     }
 
-    let result = platform::reveal_in_folder(&target);
+    let result = if cfg!(target_os = "windows") {
+        // /select,path highlights the file in explorer
+        StdCommand::new("explorer")
+            .arg("/select,")
+            .arg(&target)
+            .status()
+    } else if cfg!(target_os = "macos") {
+        // -R reveals and selects the file in Finder
+        StdCommand::new("open").arg("-R").arg(&target).status()
+    } else {
+        // Linux fallback (usually xdg-open doesn't select, but we open the folder)
+        let dir = if target.is_file() {
+            target.parent().unwrap_or(&target)
+        } else {
+            &target
+        };
+        StdCommand::new("xdg-open").arg(dir).status()
+    };
 
     match result {
         Ok(exit) if exit.success() => Ok(Json(serde_json::json!({ "ok": true }))),
@@ -224,7 +241,7 @@ async fn open_settings_handler(State(state): State<ApiState>) -> Result<Json<ser
 }
 
 async fn open_downloads_handler(State(state): State<ApiState>) -> Result<Json<serde_json::Value>, AppError> {
-    platform::open_downloads_folder(&state.config).await.map_err(|err| {
+    crate::open_downloads_folder(&state.config).await.map_err(|err| {
         error!(error = %err, "failed to open downloads folder via API");
         AppError::Internal(format!("failed to open downloads: {err}"))
     })?;
@@ -246,7 +263,7 @@ async fn handle_socket(mut socket: WebSocket, queue: QueueState) {
         tokio::select! {
             msg = socket.recv() => {
                 match msg {
-                    Some(Ok(axum::extract::ws::Message::Close(_))) | None => break,
+                    Some(Ok(Message::Close(_))) | None => break,
                     Some(Ok(_)) => {}
                     Some(Err(_)) => break,
                 }
@@ -255,7 +272,7 @@ async fn handle_socket(mut socket: WebSocket, queue: QueueState) {
                 match evt {
                     Ok(event) => {
                         if let Ok(text) = serde_json::to_string(&event) {
-                            if socket.send(axum::extract::ws::Message::Text(text)).await.is_err() {
+                            if socket.send(Message::Text(text)).await.is_err() {
                                 break;
                             }
                         }

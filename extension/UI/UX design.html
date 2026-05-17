@@ -1,0 +1,614 @@
+
+<h2 class="sr-only">Ferry Extension Design System Guide — covering colors, typography, spacing, components, and UX feedback</h2>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0c0c0c;
+  --surface: #141414;
+  --surface2: #1a1a1a;
+  --surface3: #222222;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0;
+  --muted: #888;
+  --muted2: #555;
+  --accent: #B5F23D;
+  --accent2: #FF5C3A;
+  --accent3: #3D8FF2;
+  --mono: 'DM Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+
+body { background: var(--bg); color: var(--text); font-family: var(--mono); }
+
+.guide { padding: 2rem 1.5rem; max-width: 680px; }
+
+.section { margin-bottom: 3rem; }
+
+.section-label {
+  font-family: var(--display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid var(--border2);
+}
+
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* COLOR SWATCHES */
+.swatch-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+.swatch {
+  width: 48px; height: 48px;
+  border-radius: 8px;
+  display: flex; align-items: flex-end;
+  padding: 4px;
+  font-size: 9px;
+  font-weight: 500;
+  position: relative;
+}
+.swatch-label {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+}
+.swatch-group { display: flex; flex-direction: column; align-items: center; }
+
+/* TYPOGRAPHY SCALE */
+.type-row {
+  display: flex; align-items: baseline; gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.type-meta { font-size: 10px; color: var(--muted); width: 120px; flex-shrink: 0; }
+.type-sample { flex: 1; }
+
+/* SPACING */
+.spacing-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+.spacing-bar { background: var(--accent); opacity: 0.7; height: 8px; border-radius: 2px; }
+.spacing-label { font-size: 11px; color: var(--muted); width: 80px; }
+.spacing-val { font-size: 11px; color: var(--text); }
+
+/* COMPONENT PREVIEWS */
+.comp-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 1rem; }
+
+/* Status pill */
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 500;
+}
+.pill-dot { width: 6px; height: 6px; border-radius: 50%; }
+.pill-live { background: rgba(61,143,242,0.15); color: #3D8FF2; }
+.pill-live .pill-dot { background: #3D8FF2; }
+.pill-error { background: rgba(255,92,58,0.15); color: #FF5C3A; }
+.pill-error .pill-dot { background: #FF5C3A; }
+.pill-done { background: rgba(181,242,61,0.15); color: #B5F23D; }
+.pill-done .pill-dot { background: #B5F23D; }
+
+/* Transfer card */
+.transfer-card {
+  background: var(--surface2);
+  border: 0.5px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex; gap: 10px; align-items: flex-start;
+  width: 100%;
+}
+.transfer-thumb {
+  width: 52px; height: 36px;
+  border-radius: 6px;
+  background: var(--surface3);
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.transfer-info { flex: 1; min-width: 0; }
+.transfer-title { font-size: 12px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.transfer-meta { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.progress-track { height: 3px; background: var(--surface3); border-radius: 2px; }
+.progress-fill { height: 3px; background: var(--accent); border-radius: 2px; width: 0%; transition: width 1s ease; }
+.transfer-badge {
+  font-size: 9px; font-weight: 600;
+  background: var(--surface3); color: var(--muted);
+  padding: 2px 6px; border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+/* Download popup */
+.popup-preview {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px;
+  width: 100%;
+}
+.popup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.popup-title { font-family: var(--display); font-size: 14px; font-weight: 700; }
+.popup-close { font-size: 16px; color: var(--muted); cursor: pointer; }
+.tab-row { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+.tab {
+  flex: 1; padding: 6px; border-radius: 6px;
+  font-size: 11px; text-align: center; cursor: pointer; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.tab.active { background: var(--surface3); color: var(--text); }
+.quality-list { margin-bottom: 12px; }
+.quality-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 10px; border-radius: 7px; cursor: pointer;
+  font-size: 11px; margin-bottom: 2px;
+}
+.quality-item.selected { background: rgba(181,242,61,0.1); border: 0.5px solid rgba(181,242,61,0.3); }
+.quality-item:not(.selected) { color: var(--muted); }
+.quality-check { color: var(--accent); font-size: 13px; }
+.quality-size { font-size: 10px; color: var(--muted); }
+.clip-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.clip-input {
+  flex: 1; background: var(--surface2); border: 0.5px solid var(--border2);
+  border-radius: 7px; padding: 7px 10px; font-size: 11px; color: var(--text);
+  font-family: var(--mono);
+}
+.clip-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.dl-btn {
+  width: 100%; padding: 10px;
+  background: var(--accent); color: #0c0c0c;
+  border-radius: 8px; border: none; cursor: pointer;
+  font-family: var(--display); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* UX feedback items */
+.ux-item {
+  display: flex; gap: 12px; padding: 12px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.ux-item:last-child { border-bottom: none; }
+.ux-tag {
+  font-size: 9px; font-weight: 600; padding: 3px 8px;
+  border-radius: 4px; height: fit-content; white-space: nowrap;
+  letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0;
+  margin-top: 1px;
+}
+.tag-fix { background: rgba(255,92,58,0.15); color: #FF5C3A; }
+.tag-improve { background: rgba(61,143,242,0.15); color: #3D8FF2; }
+.tag-add { background: rgba(181,242,61,0.12); color: #B5F23D; }
+.ux-text { font-size: 12px; color: var(--text); line-height: 1.6; }
+.ux-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* Header comparison */
+.compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.compare-col { }
+.compare-label { font-size: 10px; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+.before-header {
+  background: #1c1c1c; border: 0.5px solid #333;
+  border-radius: 10px; padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.after-header {
+  background: var(--surface); border: 0.5px solid var(--border2);
+  border-radius: 10px; padding: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-before {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #2a2a2a; border: 0.5px solid #444;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.logo-after {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--accent); color: #0c0c0c;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 14px; font-weight: 700;
+}
+.name-before { font-size: 15px; font-weight: 600; color: #e0e0e0; }
+.name-after { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--text); }
+.status-before { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11px; color: #FF5C3A; }
+.status-after { margin-left: auto; }
+
+/* ICON BAR */
+.icon-bar { display: flex; gap: 6px; }
+.icon-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: var(--surface2); border: 0.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer; color: var(--muted);
+}
+.icon-btn.active { background: rgba(181,242,61,0.1); border-color: rgba(181,242,61,0.3); color: var(--accent); }
+
+.divider { height: 0.5px; background: var(--border2); margin: 1.5rem 0; }
+.note { font-size: 11px; color: var(--muted); line-height: 1.6; padding: 10px 12px; background: var(--surface2); border-left: 2px solid var(--accent); border-radius: 4px; margin-top: 1rem; }
+.token-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 0.5px solid var(--border); font-size: 11px; }
+.token-row:last-child { border-bottom: none; }
+.token-name { color: var(--muted); font-family: var(--mono); }
+.token-val { color: var(--text); font-family: var(--mono); }
+.token-preview { width: 20px; height: 20px; border-radius: 4px; }
+
+.big-label {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+</style>
+
+<div class="guide">
+
+  <div style="margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--border2);">
+    <div style="font-size: 10px; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--display); font-weight: 600; margin-bottom: 8px;">Ferry Extension</div>
+    <div style="font-family: var(--display); font-size: 26px; font-weight: 700; line-height: 1.1; margin-bottom: 8px;">UI/UX Design System</div>
+    <div style="font-size: 12px; color: var(--muted); line-height: 1.7;">A complete reference for building consistent, polished UI across all extension views. Follow this to maintain visual identity everywhere.</div>
+  </div>
+
+  <!-- SECTION 1: COLOR -->
+  <div class="section">
+    <div class="section-label">01</div>
+    <div class="section-title">Color System</div>
+
+    <div class="card">
+      <div class="card-title">Primary Palette</div>
+      <div class="swatch-row">
+        <div class="swatch-group">
+          <div class="swatch" style="background:#B5F23D;"></div>
+          <div class="swatch-label">Acid<br>#B5F23D</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#FF5C3A;"></div>
+          <div class="swatch-label">Error<br>#FF5C3A</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#3D8FF2;"></div>
+          <div class="swatch-label">Live<br>#3D8FF2</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#f0f0f0;"></div>
+          <div class="swatch-label">Text<br>#F0F0F0</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#888888;"></div>
+          <div class="swatch-label">Muted<br>#888888</div>
+        </div>
+      </div>
+      <div class="card-title" style="margin-top: 1rem;">Surface Stack</div>
+      <div class="swatch-row">
+        <div class="swatch-group">
+          <div class="swatch" style="background:#0c0c0c; border: 0.5px solid #333;"></div>
+          <div class="swatch-label">Base<br>#0C0C0C</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#141414; border: 0.5px solid #333;"></div>
+          <div class="swatch-label">L1<br>#141414</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#1a1a1a; border: 0.5px solid #333;"></div>
+          <div class="swatch-label">L2<br>#1A1A1A</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#222222; border: 0.5px solid #333;"></div>
+          <div class="swatch-label">L3<br>#222222</div>
+        </div>
+        <div class="swatch-group">
+          <div class="swatch" style="background:#2c2c2c; border: 0.5px solid #444;"></div>
+          <div class="swatch-label">L4<br>#2C2C2C</div>
+        </div>
+      </div>
+      <div class="note">Accent green (#B5F23D) is used for: primary CTA, progress fill, selected states, success indicators. Never use it decoratively — every use must signal "action" or "done".</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Semantic Color Usage</div>
+      <div class="token-row"><span class="token-name">Live / Active</span><span class="token-val">#3D8FF2 — blue</span></div>
+      <div class="token-row"><span class="token-name">Error / Offline</span><span class="token-val">#FF5C3A — coral</span></div>
+      <div class="token-row"><span class="token-name">Done / Success</span><span class="token-val">#B5F23D — acid green</span></div>
+      <div class="token-row"><span class="token-name">Queued / Pending</span><span class="token-val">#888888 — muted gray</span></div>
+      <div class="token-row"><span class="token-name">Warning</span><span class="token-val">#F5A623 — amber</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: TYPOGRAPHY -->
+  <div class="section">
+    <div class="section-label">02</div>
+    <div class="section-title">Typography</div>
+
+    <div class="card">
+      <div class="card-title">Typefaces</div>
+      <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        <div>
+          <div style="font-size: 10px; color: var(--muted); margin-bottom: 4px;">Display / Headings</div>
+          <div style="font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--text);">Syne</div>
+          <div style="font-size: 10px; color: var(--muted); font-family: var(--mono);">Bold, geometric, confident</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; color: var(--muted); margin-bottom: 4px;">Body / UI / Code</div>
+          <div style="font-family: var(--mono); font-size: 18px; font-weight: 400; color: var(--text);">DM Mono</div>
+          <div style="font-size: 10px; color: var(--muted); font-family: var(--mono);">Technical, precise, readable</div>
+        </div>
+      </div>
+      <div class="note">DM Mono for all body, labels, and data. Syne for app name, section headers, and primary CTA buttons only. This pairing gives a "developer tool done beautifully" feel.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Type Scale</div>
+      <div class="type-row">
+        <div class="type-meta">App Title / 16px 700</div>
+        <div class="type-sample" style="font-family: var(--display); font-size: 16px; font-weight: 700;">Ferry</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Section Header / 12px 600</div>
+        <div class="type-sample" style="font-family: var(--display); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);">Recent Transfers</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Body / 12px 400</div>
+        <div class="type-sample" style="font-size: 12px;">I Can't Close My Bank Account | Gautam Govindan</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Meta / 11px 400</div>
+        <div class="type-sample" style="font-size: 11px; color: var(--muted);">2160p · MP4 · 1.2 GB</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Label / 9px 600</div>
+        <div class="type-sample" style="font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);">Queued</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: SPACING & RADIUS -->
+  <div class="section">
+    <div class="section-label">03</div>
+    <div class="section-title">Spacing & Radius</div>
+
+    <div class="card">
+      <div class="card-title">Spacing Tokens</div>
+      <div class="spacing-row"><div class="spacing-label">--space-xs</div><div class="spacing-bar" style="width: 4px;"></div><div class="spacing-val">4px — icon gaps, tight pairs</div></div>
+      <div class="spacing-row"><div class="spacing-label">--space-sm</div><div class="spacing-bar" style="width: 8px;"></div><div class="spacing-val">8px — internal component gap</div></div>
+      <div class="spacing-row"><div class="spacing-label">--space-md</div><div class="spacing-bar" style="width: 12px;"></div><div class="spacing-val">12px — element spacing</div></div>
+      <div class="spacing-row"><div class="spacing-label">--space-lg</div><div class="spacing-bar" style="width: 16px;"></div><div class="spacing-val">16px — section padding</div></div>
+      <div class="spacing-row"><div class="spacing-label">--space-xl</div><div class="spacing-bar" style="width: 24px;"></div><div class="spacing-val">24px — outer container padding</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Border Radius</div>
+      <div class="token-row"><span class="token-name">Pill / badges / status dots</span><span class="token-val">100px</span></div>
+      <div class="token-row"><span class="token-name">Buttons / inputs / quality rows</span><span class="token-val">8px</span></div>
+      <div class="token-row"><span class="token-name">Cards / transfer items</span><span class="token-val">10–12px</span></div>
+      <div class="token-row"><span class="token-name">Popup / tray window</span><span class="token-val">16px</span></div>
+      <div class="token-row"><span class="token-name">Thumbnails</span><span class="token-val">6px</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: COMPONENTS -->
+  <div class="section">
+    <div class="section-label">04</div>
+    <div class="section-title">Component Library</div>
+
+    <div class="card">
+      <div class="card-title">Status Pills</div>
+      <div class="comp-row">
+        <div class="pill pill-live"><div class="pill-dot"></div>Live · 1</div>
+        <div class="pill pill-error"><div class="pill-dot"></div>Error · 0</div>
+        <div class="pill pill-done"><div class="pill-dot"></div>Done · 3</div>
+      </div>
+      <div class="note">Replace the current plain text "LIVE 1 / ERROR 0 / DONE 0" row with these pills. Add the count inside the pill, not next to it. Much cleaner at a glance.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Transfer Item — Redesigned</div>
+      <div class="transfer-card">
+        <div class="transfer-thumb">🎬</div>
+        <div class="transfer-info">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <span class="transfer-badge">2160P</span>
+            <span class="transfer-badge">MP4</span>
+          </div>
+          <div class="transfer-title">I Can't Close My Bank Account | Gautam Govindan</div>
+          <div class="transfer-meta">1.2 GB · 21:32</div>
+          <div class="progress-track"><div class="progress-fill" id="prog"></div></div>
+          <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);">Queued</span>
+            <span style="font-size: 10px; color: var(--muted);">0%</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">Key changes: badges are grouped top-left inside the card, progress bar is always visible (even at 0% — shows the track), meta line combines size + duration.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Download Popup — Redesigned</div>
+      <div class="popup-preview">
+        <div class="popup-header">
+          <div class="popup-title">Ferry</div>
+          <div class="popup-close">×</div>
+        </div>
+        <div class="tab-row">
+          <div class="tab active"><i class="ti ti-video" aria-hidden="true"></i> Video</div>
+          <div class="tab"><i class="ti ti-music" aria-hidden="true"></i> Audio</div>
+          <div class="tab"><i class="ti ti-scissors" aria-hidden="true"></i> Clip</div>
+        </div>
+        <div style="font-size: 10px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.06em; text-transform: uppercase;">Quality</div>
+        <div class="quality-list">
+          <div class="quality-item selected">
+            <span>MP4 · 2160p · 4K</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="quality-size">1.2 GB</span>
+              <span class="quality-check">✓</span>
+            </div>
+          </div>
+          <div class="quality-item"><span>MP4 · 1440p · 2K</span><span class="quality-size">515 MB</span></div>
+          <div class="quality-item"><span>MP4 · 1080p · Full HD</span><span class="quality-size">280 MB</span></div>
+          <div class="quality-item"><span>MP4 · 720p · HD</span><span class="quality-size">140 MB</span></div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+          <div>
+            <div class="clip-label">From</div>
+            <div class="clip-input">00:00:00</div>
+          </div>
+          <div>
+            <div class="clip-label">To</div>
+            <div class="clip-input">00:16:23</div>
+          </div>
+        </div>
+        <button class="dl-btn">Download</button>
+      </div>
+      <div class="note">Tab bar now uses icon + label. "Clip" is a third tab, not always-visible fields. Quality items show size inline. CTA button uses Syne bold + accent green.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">App Header — Before vs After</div>
+      <div class="compare-row">
+        <div class="compare-col">
+          <div class="compare-label">Before</div>
+          <div class="before-header">
+            <div class="logo-before">⚓</div>
+            <div>
+              <div class="name-before">Ferry</div>
+            </div>
+            <div class="status-before">● Offline</div>
+          </div>
+        </div>
+        <div class="compare-col">
+          <div class="compare-label">After</div>
+          <div class="after-header">
+            <div class="logo-after">F</div>
+            <div>
+              <div class="name-after">Ferry</div>
+            </div>
+            <div class="status-after">
+              <div class="pill pill-live" style="padding: 3px 8px; font-size: 10px;"><div class="pill-dot"></div>Online</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">Logo becomes a colored square with letter mark (like Linear/Vercel). Status moves into a pill component. Consistent with the rest of the design system.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: UX FEEDBACK -->
+  <div class="section">
+    <div class="section-label">05</div>
+    <div class="section-title">UX Audit & Fixes</div>
+
+    <div class="card">
+      <div class="ux-item">
+        <div class="ux-tag tag-fix">Fix</div>
+        <div>
+          <div class="ux-text">Status counts (Live/Error/Done) lack visual hierarchy</div>
+          <div class="ux-sub">Replace plain text row with coloured status pills. Counts should live inside the pill. Current design requires reading 3 separate labels — pills communicate state at a glance.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-fix">Fix</div>
+        <div>
+          <div class="ux-text">Popup has no visual feedback when app is offline</div>
+          <div class="ux-sub">Add a full-width banner: "Ferry desktop app not running. Open Ferry →" with a launch deep-link. Currently shows nothing, leaving users confused.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-fix">Fix</div>
+        <div>
+          <div class="ux-text">Quality list has no file size at a glance</div>
+          <div class="ux-sub">Every quality row must show file size inline (e.g. "515 MB"). Users need this to decide — 4K on a 10min video is often 2GB+. This is the #1 decision factor.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-improve">Improve</div>
+        <div>
+          <div class="ux-text">Progress bar is absent during Queued state</div>
+          <div class="ux-sub">Show the track at 0% always. Seeing an empty bar is more honest than seeing nothing. When download starts, animate fill with yt-dlp's progress output.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-improve">Improve</div>
+        <div>
+          <div class="ux-text">Clip time fields always visible, wasting space</div>
+          <div class="ux-sub">Move From/To into a third "Clip" tab. Most users never clip — don't show it by default. Tab approach keeps the popup compact and focused.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-improve">Improve</div>
+        <div>
+          <div class="ux-text">Download button label is generic</div>
+          <div class="ux-sub">Change "Download video" to "Download · 1.2 GB" — show the selected file size in the button. Makes users feel informed before they commit.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-add">Add</div>
+        <div>
+          <div class="ux-text">No done state / success feedback in popup</div>
+          <div class="ux-sub">After download completes, replace the download button with: "✓ Saved — Show in Finder" (or Explorer on Windows). Clicking opens the folder. Critical for UX closure.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-add">Add</div>
+        <div>
+          <div class="ux-text">No keyboard shortcuts</div>
+          <div class="ux-sub">Power users expect: Escape to close, Enter to start download, 1-4 to select quality. Add tooltip on hover showing the shortcut. Small effort, big feel improvement.</div>
+        </div>
+      </div>
+      <div class="ux-item">
+        <div class="ux-tag tag-add">Add</div>
+        <div>
+          <div class="ux-text">Thumbnail not loaded in transfer items</div>
+          <div class="ux-sub">Extract video thumbnail URL from the page metadata and show it in the 52×36 slot. Makes the history list scannable without reading titles. Already available as og:image.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: MOTION -->
+  <div class="section">
+    <div class="section-label">06</div>
+    <div class="section-title">Motion Principles</div>
+    <div class="card">
+      <div class="token-row"><span class="token-name">Easing</span><span class="token-val">cubic-bezier(0.16, 1, 0.3, 1) — expo out</span></div>
+      <div class="token-row"><span class="token-name">Duration fast</span><span class="token-val">120ms — state changes, hover</span></div>
+      <div class="token-row"><span class="token-name">Duration base</span><span class="token-val">220ms — popup open, tab switch</span></div>
+      <div class="token-row"><span class="token-name">Duration slow</span><span class="token-val">400ms — progress bar fill</span></div>
+      <div class="token-row"><span class="token-name">Popup entrance</span><span class="token-val">translateY(6px) → 0 + opacity 0 → 1</span></div>
+      <div class="token-row"><span class="token-name">Progress fill</span><span class="token-val">width transition, linear easing only</span></div>
+      <div class="note">No bounce, no spring. This is a utility tool — motion should feel precise and fast, not playful. Every animation should confirm an action, never decorate.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+setTimeout(() => {
+  const p = document.getElementById('prog');
+  if (p) { p.style.width = '0%'; }
+}, 100);
+</script>

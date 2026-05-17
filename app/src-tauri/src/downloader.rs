@@ -14,15 +14,14 @@ use std::time::Duration;
 
 use anyhow::{anyhow, Context, Result};
 use regex::Regex;
-use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::lookup_host;
+use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 use tokio::sync::mpsc;
 use tracing::{info, warn};
 
 use crate::config::AppConfig;
 use crate::models::DownloadRequest;
-use crate::platform;
 
 /// Maximum time allowed for a single download subprocess.
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(30 * 60); // 30 minutes
@@ -209,7 +208,7 @@ async fn execute_download(
     let status = loop {
         if cancel_flag.load(Ordering::SeqCst) {
             if let Some(pid) = child_pid {
-                platform::terminate_process(pid).await;
+                terminate_process(pid).await;
             } else {
                 let _ = child.kill().await;
             }
@@ -515,9 +514,39 @@ fn humanize_download_error(message: &str) -> String {
     trimmed.to_string()
 }
 
+async fn terminate_process(pid: u32) {
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(mut child) = Command::new("taskkill")
+            .arg("/PID")
+            .arg(pid.to_string())
+            .arg("/T")
+            .arg("/F")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+        {
+            let _ = child.wait().await;
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        if let Ok(mut child) = Command::new("kill")
+            .arg("-TERM")
+            .arg(pid.to_string())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+        {
+            let _ = child.wait().await;
+        }
+    }
+}
+
 /// Resolve a binary by name from bundled sidecar resources only.
 pub fn resolve_binary(name: &str) -> Result<PathBuf> {
-    let candidates = platform::sidecar_candidates(name);
+    let candidates = sidecar_candidates(name);
     for candidate in candidates {
         if candidate.exists() && !is_placeholder_sidecar(&candidate) {
             info!(binary = %candidate.display(), "resolved sidecar binary");
@@ -548,10 +577,103 @@ fn resolve_ffmpeg_location() -> Result<PathBuf> {
     fs::create_dir_all(&alias_dir)
         .with_context(|| format!("failed to create sidecar alias dir {}", alias_dir.display()))?;
 
-    platform::link_or_copy_sidecar(&ffmpeg, &alias_dir.join(platform::executable_alias("ffmpeg")))?;
-    platform::link_or_copy_sidecar(&ffprobe, &alias_dir.join(platform::executable_alias("ffprobe")))?;
+    link_or_copy_sidecar(&ffmpeg, &alias_dir.join(executable_alias("ffmpeg")))?;
+    link_or_copy_sidecar(&ffprobe, &alias_dir.join(executable_alias("ffprobe")))?;
 
     Ok(alias_dir)
+}
+
+fn executable_alias(name: &str) -> String {
+    if cfg!(target_os = "windows") {
+        format!("{name}.exe")
+    } else {
+        name.to_string()
+    }
+}
+
+#[cfg(unix)]
+fn link_or_copy_sidecar(source: &Path, destination: &Path) -> Result<()> {
+    use std::os::unix::fs as unix_fs;
+
+    if destination.exists() {
+        fs::remove_file(destination).with_context(|| {
+            format!("failed to replace sidecar alias {}", destination.display())
+        })?;
+    }
+
+    unix_fs::symlink(source, destination)
+        .or_else(|_| {
+            fs::copy(source, destination)
+                .map(|_| ())
+                .with_context(|| {
+                    format!(
+                        "failed to copy sidecar {} to {}",
+                        source.display(),
+                        destination.display()
+                    )
+                })
+        })
+        .with_context(|| {
+            format!(
+                "failed to prepare sidecar alias {} -> {}",
+                destination.display(),
+                source.display()
+            )
+        })
+}
+
+#[cfg(windows)]
+fn link_or_copy_sidecar(source: &Path, destination: &Path) -> Result<()> {
+    if destination.exists() {
+        fs::remove_file(destination).with_context(|| {
+            format!("failed to replace sidecar alias {}", destination.display())
+        })?;
+    }
+
+    fs::copy(source, destination)
+        .map(|_| ())
+        .with_context(|| {
+            format!(
+                "failed to copy sidecar {} to {}",
+                source.display(),
+                destination.display()
+            )
+        })
+}
+
+/// Generate candidate paths for a platform-specific sidecar binary.
+fn sidecar_candidates(name: &str) -> Vec<PathBuf> {
+    let mut names = Vec::new();
+    // Tauri sidecars are usually name-platform, but let's check both
+    if cfg!(target_os = "macos") {
+        names.push(format!("{name}-mac"));
+    } else if cfg!(target_os = "windows") {
+        names.push(format!("{name}-win.exe"));
+    } else {
+        names.push(format!("{name}-linux"));
+    }
+    // Also check standard names
+    names.push(name.to_string());
+    if cfg!(target_os = "windows") {
+        names.push(format!("{name}.exe"));
+    }
+
+    let mut candidates = Vec::new();
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(parent) = exe.parent() {
+            let resource_dir = parent.join("resources");
+            for n in &names {
+                candidates.push(resource_dir.join(n));
+            }
+        }
+    }
+
+    for n in &names {
+        candidates.push(Path::new("resources").join(n));
+        candidates.push(Path::new("app/src-tauri/resources").join(n));
+    }
+
+    candidates
 }
 
 /// Build the output file path template for yt-dlp.

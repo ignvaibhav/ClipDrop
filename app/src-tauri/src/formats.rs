@@ -242,47 +242,52 @@ fn build_format_options(
 ) -> Vec<FormatOption> {
     let mut result = Vec::new();
 
-    for target_height in VIDEO_HEIGHT_PRESETS {
-        let Some(candidates) = videos_by_height.get(&target_height) else {
-            continue;
-        };
-        let Some(best_video) = candidates
-            .iter()
-            .max_by(|l, r| rank_video_candidate(l).cmp(&rank_video_candidate(r)))
-        else {
-            continue;
-        };
-
-        let selector: Option<String> = if best_video.has_audio {
-            Some(best_video.format_id.clone())
-        } else {
-            None
-        };
-
-        let merge_note = if best_video.has_audio {
-            if is_stream_protocol(&best_video.protocol) {
-                "progressive HLS stream"
-            } else {
-                "progressive stream"
-            }
-        } else {
-            "video+audio merge"
-        };
-
+    // 1. Find absolute best video
+    let mut all_video_candidates: Vec<&VideoCandidate> = videos_by_height.values().flatten().collect();
+    all_video_candidates.sort_by(|l, r| rank_video_candidate(l).cmp(&rank_video_candidate(r)));
+    
+    if let Some(absolute_best) = all_video_candidates.last() {
         result.push(FormatOption {
-            label: format!("{}p", best_video.height),
+            label: "Best Video".to_string(),
             media_type: "video".to_string(),
             format: "mp4".to_string(),
-            quality: format!("{}p", best_video.height),
+            quality: "best".to_string(),
+            format_id: if absolute_best.has_audio { Some(absolute_best.format_id.clone()) } else { None },
+            width: None,
+            height: Some(absolute_best.height),
+            note: Some(format!("auto-best • source {} • {}p", absolute_best.ext, absolute_best.height)),
+            filesize: absolute_best.filesize,
+            vcodec: Some(absolute_best.vcodec.clone()),
+        });
+    }
+
+    // 2. Add ALL available resolutions (sorted descending by height)
+    let mut heights: Vec<u16> = videos_by_height.keys().cloned().collect();
+    heights.sort_by(|a, b| b.cmp(a));
+
+    for height in heights {
+        let Some(candidates) = videos_by_height.get(&height) else { continue };
+        let Some(best_at_res) = candidates.iter().max_by(|l, r| rank_video_candidate(l).cmp(&rank_video_candidate(r))) else { continue };
+
+        // Don't duplicate if this height is already the 'absolute best'
+        if result.iter().any(|o| o.quality == "best" && o.height == Some(best_at_res.height)) {
+            continue;
+        }
+
+        let selector = if best_at_res.has_audio { Some(best_at_res.format_id.clone()) } else { None };
+        let merge_note = if best_at_res.has_audio { "progressive" } else { "video+audio merge" };
+
+        result.push(FormatOption {
+            label: format!("{}p", best_at_res.height),
+            media_type: "video".to_string(),
+            format: "mp4".to_string(),
+            quality: format!("{}p", best_at_res.height),
             format_id: selector,
             width: None,
-            height: Some(best_video.height),
-            note: Some(format!(
-                "{} • source {} • {:.0} kbps",
-                merge_note, best_video.ext, best_video.tbr
-            )),
-            filesize: best_video.filesize,
-            vcodec: Some(best_video.vcodec.clone()),
+            height: Some(best_at_res.height),
+            note: Some(format!("{} • source {} • {:.0} kbps", merge_note, best_at_res.ext, best_at_res.tbr)),
+            filesize: best_at_res.filesize,
+            vcodec: Some(best_at_res.vcodec.clone()),
         });
     }
 

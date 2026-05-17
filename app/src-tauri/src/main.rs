@@ -12,7 +12,6 @@ mod formats;
 mod models;
 mod queue;
 mod server;
-mod platform;
 
 use std::fs;
 use std::path::PathBuf;
@@ -186,6 +185,27 @@ fn browse_download_directory(current_path: Option<String>) -> Result<Option<Stri
 }
 
 // ---------------------------------------------------------------------------
+// Utility
+// ---------------------------------------------------------------------------
+
+pub async fn open_downloads_folder(config: &AppConfig) -> anyhow::Result<()> {
+    let path = config.effective_download_dir().await;
+
+    if cfg!(target_os = "macos") {
+        std::process::Command::new("open").arg(&path).spawn()?;
+        return Ok(());
+    }
+
+    if cfg!(target_os = "windows") {
+        std::process::Command::new("explorer").arg(&path).spawn()?;
+        return Ok(());
+    }
+
+    std::process::Command::new("xdg-open").arg(&path).spawn()?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -275,7 +295,7 @@ fn main() {
                         "open_downloads" => {
                             let cfg = config.clone();
                             tauri::async_runtime::spawn(async move {
-                                if let Err(err) = platform::open_downloads_folder(&cfg).await {
+                                if let Err(err) = open_downloads_folder(&cfg).await {
                                     error!(error = %err, "failed to open downloads folder");
                                 }
                             });
